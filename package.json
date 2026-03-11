@@ -1,0 +1,20 @@
+{
+  "name": "stocks_app",
+  "version": "1.0.0",
+  "description": "Stock trading backend project",
+  "homepage": "https://github.com/kashish-2003/stocks_app#readme",
+  "bugs": {
+    "url": "https://github.com/kashish-2003/stocks_app/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kashish-2003/stocks_app.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
