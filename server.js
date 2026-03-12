@@ -1,19 +1,29 @@
-require("dotenv").config()
+require("dotenv").config();
+const express = require("express");
+const bodyParser = require("body-parser");
 
-const express=require("express")
+const authRoutes = require("./routes/authRoutes");
+const depositRoutes = require("./routes/depositRoutes");
+const withdrawRoutes = require("./routes/withdrawRoutes");
+const transactionRoutes = require("./routes/transactionRoutes");
 
-const bodyParser=require("body-parser")
+const app = express();
 
-const authRoutes=require("./routes/authRoutes")
+// Body parser
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
-const app=express()
+// Static folder for screenshots
+app.use("/uploads", express.static("uploads"));
 
-app.use(bodyParser.json())
+// Routes
+app.use("/api/auth", authRoutes);
+app.use("/api/deposit", depositRoutes);
+app.use("/api/withdraw", withdrawRoutes);
+app.use("/api/transactions", transactionRoutes);
 
-app.use("/api",authRoutes)
-
-app.listen(5000,()=>{
-
-console.log("Server running on port 5000")
-
-})
+// Server start
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
