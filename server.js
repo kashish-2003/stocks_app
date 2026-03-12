@@ -1,7 +1,10 @@
 require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
+const cors = require("cors");
 
+
+const stockRouter = require("./routes/stockRouter");
 const authRoutes = require("./routes/authRoutes");
 const depositRoutes = require("./routes/depositRoutes");
 const withdrawRoutes = require("./routes/withdrawRoutes");
@@ -21,6 +24,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/deposit", depositRoutes);
 app.use("/api/withdraw", withdrawRoutes);
 app.use("/api/transactions", transactionRoutes);
+app.use("/api", stockRouter);
 
 // Server start
 const PORT = process.env.PORT || 5000;
