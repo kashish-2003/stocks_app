@@ -1,15 +1,12 @@
+// routes/depositRoute.js
 const express = require("express");
 const router = express.Router();
 
-const depositController = require("../controllers/depositController");
-const auth = require("../middlewares/authMiddleware");
-const upload = require("../middlewares/uploadMiddleware");
+const { deposit } = require("../controllers/depositController");
+const auth = require("../middleware/authMiddleware");
+const upload = require("../middleware/uploadMiddleware"); // multer setup
 
-router.post(
-    "/deposit",
-    auth,
-    upload.single("screenshot"),
-    depositController.deposit
-);
+// Deposit API
+router.post("/", auth, upload.single("screenshot"), deposit);
 
 module.exports = router;

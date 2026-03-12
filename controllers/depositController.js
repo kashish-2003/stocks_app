@@ -1,32 +1,22 @@
 const depositService = require("../services/depositService");
 
-exports.deposit = async (req, res) => {
+exports.deposit = (req, res) => {
+  const user_id = req.user.id;
+  const { cti_id, amount_inr, leverage } = req.body;
+  const screenshotFileName = req.file ? req.file.filename : null;
 
-    try {
-
-        const user_id = req.user.id;
-        const { cti_id, amount_inr, leverage } = req.body;
-        const screenshot = req.file ? req.file.filename : null;
-
-        const result = await depositService.createDeposit(
-            user_id,
-            cti_id,
-            amount_inr,
-            leverage,
-            screenshot
-        );
-
-        res.json({
-            message: "Deposit request created",
-            data: result
-        });
-
-    } catch (error) {
-
-        res.status(500).json({
-            error: error.message
-        });
-
+  depositService.createDeposit(
+    user_id,
+    cti_id,
+    amount_inr,
+    leverage,
+    screenshotFileName,
+    (err, depositId) => {
+      if (err) {
+        console.error("Deposit Error:", err);
+        return res.status(500).json({ error: err.message || "Server error" });
+      }
+      res.status(200).json({ success: true, message: "Deposit request created", depositId });
     }
-
+  );
 };

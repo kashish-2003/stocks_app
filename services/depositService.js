@@ -1,31 +1,28 @@
-const db = require("../config/db");
+const db = require("../config/db"); // normal mysql2
 
-exports.createDeposit = async (
-    user_id,
-    cti_id,
-    amount_inr,
-    leverage,
-    screenshot
-) => {
+exports.createDeposit = (user_id, cti_id, amount_inr, leverage, screenshotFileName, callback) => {
+  // 1️⃣ Insert into deposits
+  db.query(
+    `INSERT INTO deposits (user_id, sender_cti, amount_inr, leverage, screenshot, status) 
+     VALUES (?, ?, ?, ?, ?, 'pending')`,
+    [user_id, cti_id, amount_inr, leverage, screenshotFileName],
+    (err, depositResult) => {
+      if (err) return callback(err);
 
-    const [result] = await db.query(
+      const depositId = depositResult.insertId;
 
-        `INSERT INTO deposits 
-        (user_id, sender_cti, amount_inr, leverage, screenshot)
-        VALUES (?, ?, ?, ?, ?)`,
-        [user_id, cti_id, amount_inr, leverage, screenshot]
+      // 2️⃣ Insert into transactions (also pending)
+      db.query(
+        `INSERT INTO transactions (user_id, sender_cti, receiver_cti, type, amount_inr, leverage, status)
+         VALUES (?, ?, 'admin@cti', 'deposit', ?, ?, 'pending')`,
+        [user_id, cti_id, amount_inr, leverage],
+        (err2) => {
+          if (err2) return callback(err2);
 
-    );
-
-    await db.query(
-
-        `INSERT INTO transactions
-        (user_id, sender_cti, receiver_cti, type, amount_inr, leverage, status)
-        VALUES (?, ?, 'admin@cti', 'deposit', ?, ?, 'pending')`,
-
-        [user_id, cti_id, amount_inr, leverage]
-
-    );
-
-    return result.insertId;
+          // ✅ Wallet update is NOT done here, will happen after admin approves
+          callback(null, depositId);
+        }
+      );
+    }
+  );
 };

@@ -1,13 +1,8 @@
 const express = require("express");
 const router = express.Router();
+const { getTransactions } = require("../controllers/transactionController");
+const auth = require("../middleware/authMiddleware"); // ensure user is logged in
 
-const transactionController = require("../controllers/transactionController");
-const auth = require("../middlewares/authMiddleware");
-
-router.get(
-    "/transactions",
-    auth,
-    transactionController.getTransactions
-);
+router.get("/", auth, getTransactions);
 
 module.exports = router;

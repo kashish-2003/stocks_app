@@ -1,22 +1,17 @@
 const transactionService = require("../services/transactionService");
 
-exports.getTransactions = async (req, res) => {
+exports.getTransactions = (req, res) => {
+  const user_id = req.user.id; // auth middleware se milega
 
-    try {
-
-        const user_id = req.user.id;
-
-        const transactions =
-            await transactionService.getTransactions(user_id);
-
-        res.json(transactions);
-
-    } catch (error) {
-
-        res.status(500).json({
-            error: error.message
-        });
-
+  transactionService.getTransactions(user_id, (err, transactions) => {
+    if (err) {
+      console.error("Transaction Controller Error:", err);
+      return res.status(500).json({ error: err.message });
     }
 
+    res.status(200).json({
+      success: true,
+      transactions
+    });
+  });
 };
