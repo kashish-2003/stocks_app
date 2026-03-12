@@ -9,6 +9,7 @@ const authRoutes = require("./routes/authRoutes");
 const depositRoutes = require("./routes/depositRoutes");
 const withdrawRoutes = require("./routes/withdrawRoutes");
 const transactionRoutes = require("./routes/transactionRoutes");
+const walletRoutes = require("./routes/walletRoutes");
 
 const app = express();
 
@@ -24,6 +25,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/deposit", depositRoutes);
 app.use("/api/withdraw", withdrawRoutes);
 app.use("/api/transactions", transactionRoutes);
+app.use("/api/wallet", walletRoutes);
 app.use("/api", stockRouter);
 
 // Server start
