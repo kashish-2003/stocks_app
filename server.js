@@ -2,13 +2,13 @@ require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
+require("./services/updateStockPrices.Service");
 
-
-const stockRouter = require("./routes/stockRouter");
 const authRoutes = require("./routes/authRoutes");
 const depositRoutes = require("./routes/depositRoutes");
 const withdrawRoutes = require("./routes/withdrawRoutes");
 const transactionRoutes = require("./routes/transactionRoutes");
+const stockRouter = require("./routes/stockRouter");
 
 const app = express();
 
