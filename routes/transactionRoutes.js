@@ -1,8 +1,10 @@
 const express = require("express");
 const router = express.Router();
-const { getTransactions } = require("../controllers/transactionController");
-const auth = require("../middleware/authMiddleware"); // ensure user is logged in
 
-router.get("/", auth, getTransactions);
+const transactionController = require("../controllers/transactionController");
+const authMiddleware = require("../middleware/authMiddleware");
+
+// GET /api/transactions?type=deposit / withdraw / empty
+router.get("/", authMiddleware, transactionController.getTransactions);
 
 module.exports = router;

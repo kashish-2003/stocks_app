@@ -1,17 +1,20 @@
 const transactionService = require("../services/transactionService");
 
 exports.getTransactions = (req, res) => {
-  const user_id = req.user.id; // auth middleware se milega
+  const user_id = req.user.id;
+  const type = req.query.type; // deposit / withdraw / undefined
 
-  transactionService.getTransactions(user_id, (err, transactions) => {
+  transactionService.getTransactions(user_id, type, (err, transactions) => {
     if (err) {
-      console.error("Transaction Controller Error:", err);
-      return res.status(500).json({ error: err.message });
+      return res.status(500).json({
+        success: false,
+        message: err.message
+      });
     }
 
-    res.status(200).json({
+    res.json({
       success: true,
-      transactions
+      data: transactions
     });
   });
 };
