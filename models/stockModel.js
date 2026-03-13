@@ -59,6 +59,7 @@ const getWalletBalance = (user_id, callback) => {
 };
 
 
+
 // UPDATE WALLET (FOR BUY)
 const updateWalletBalance = (amount, user_id, callback) => {
 
@@ -126,22 +127,38 @@ const createSellTransaction = (user_id, stock_id, symbol, quantity, total_price,
 
 
 // GET USER STOCK QUANTITY (BUY - SELL)
+// const getUserStockQuantity = (user_id, symbol, callback) => {
+
+//   const sql = `
+//     SELECT 
+//       SUM(CASE WHEN type='BUY' THEN quantity ELSE 0 END) -
+//       SUM(CASE WHEN type='SELL' THEN quantity ELSE 0 END)
+//       AS total_quantity
+//     FROM stock_transactions
+//     WHERE user_id = ? AND symbol = ?
+//   `;
+
+//   db.query(sql, [user_id, symbol], (err, rows) => {
+//     if (err) return callback(err, null);
+//     callback(null, rows);
+//   });
+
+// };
 const getUserStockQuantity = (user_id, symbol, callback) => {
 
   const sql = `
-    SELECT 
-      SUM(CASE WHEN type='BUY' THEN quantity ELSE 0 END) -
-      SUM(CASE WHEN type='SELL' THEN quantity ELSE 0 END)
-      AS total_quantity
-    FROM stock_transactions
-    WHERE user_id = ? AND symbol = ?
+  SELECT 
+    COALESCE(SUM(
+      CASE 
+        WHEN type='BUY' THEN quantity
+        WHEN type='SELL' THEN quantity
+      END
+    ),0) AS total_quantity
+  FROM stock_transactions
+  WHERE user_id=? AND symbol=?
   `;
 
-  db.query(sql, [user_id, symbol], (err, rows) => {
-    if (err) return callback(err, null);
-    callback(null, rows);
-  });
-
+  db.query(sql,[user_id,symbol],callback);
 };
 
 
@@ -160,6 +177,7 @@ const getTotalInvestment = (user_id, symbol, callback) => {
   });
 
 };
+
 
 
 // TRANSACTION HISTORY
@@ -198,5 +216,6 @@ module.exports = {
   getTransactions,
   getUserStockQuantity,
   getTotalInvestment,
+  updatePortfolio,
   addWalletBalance
 };
