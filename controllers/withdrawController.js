@@ -1,29 +1,27 @@
 const withdrawService = require("../services/withdrawService");
 
-exports.withdraw = async (req, res) => {
+exports.withdraw = (req, res) => {
 
-    try {
+  const user_id = req.user.id;
+  const { cti_id, amount_usd } = req.body;
 
-        const user_id = req.user.id;
-        const { cti_id, amount_usd } = req.body;
+  withdrawService.createWithdraw(
+    user_id,
+    cti_id,
+    amount_usd,
+    (err, withdrawId) => {
 
-        const result = await withdrawService.createWithdraw(
-            user_id,
-            cti_id,
-            amount_usd
-        );
+      if (err) {
+        return res.status(500).json({ error: err.message });
+      }
 
-        res.json({
-            message: "Withdraw request created",
-            data: result
-        });
-
-    } catch (error) {
-
-        res.status(500).json({
-            error: error.message
-        });
+      res.json({
+        success: true,
+        message: "Withdraw request created",
+        withdrawId
+      });
 
     }
+  );
 
 };
