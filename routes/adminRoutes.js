@@ -11,7 +11,8 @@ getAllDeposits,
 approveDeposit,
 rejectDeposit,
 getWithdrawRequests,
-approveWithdraw
+approveWithdraw,
+getAllWallets
 
 } = require("../controllers/adminController")
 
@@ -28,5 +29,7 @@ router.post("/deposit/reject",verifyToken,checkAdmin,rejectDeposit)
 router.get("/withdraws",verifyToken,checkAdmin,getWithdrawRequests)
 
 router.post("/withdraw/approve",verifyToken,checkAdmin,approveWithdraw)
+
+router.get("/wallets",verifyToken,checkAdmin,getAllWallets)
 
 module.exports = router

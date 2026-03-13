@@ -91,7 +91,6 @@ return res.json({message:"Deposit not found"})
 
 const deposit = result[0]
 
-// already approved check
 if(deposit.status === "approved"){
 return res.json({message:"Deposit already approved"})
 }
@@ -99,12 +98,9 @@ return res.json({message:"Deposit already approved"})
 const userId = deposit.user_id
 const inr = deposit.amount_inr
 
-// INR → USD convert
 const rate = 83
 const usd = parseFloat((inr / rate).toFixed(2))
 
-
-// update deposit table
 const updateDeposit = `
 UPDATE deposits 
 SET status='approved', amount_usd=? 
@@ -116,7 +112,6 @@ db.query(updateDeposit,[usd,deposit_id],(err)=>{
 if(err) return res.json({message:"Deposit update error"})
 
 
-// check wallet
 const checkWallet = "SELECT * FROM wallet WHERE user_id=?"
 
 db.query(checkWallet,[userId],(err,walletResult)=>{
@@ -124,7 +119,6 @@ db.query(checkWallet,[userId],(err,walletResult)=>{
 if(err) return res.json({message:"Wallet error"})
 
 
-// create wallet if not exists
 if(walletResult.length === 0){
 
 const createWallet = "INSERT INTO wallet (user_id,balance) VALUES (?,?)"
@@ -139,7 +133,6 @@ res.json({message:"Deposit approved, wallet created"})
 }
 else{
 
-// update wallet balance
 const updateWallet = "UPDATE wallet SET balance = balance + ? WHERE user_id=?"
 
 db.query(updateWallet,[usd,userId],(err)=>{
@@ -187,7 +180,19 @@ res.json({message:"Deposit rejected"})
 
 exports.getWithdrawRequests = (req,res)=>{
 
-db.query("SELECT * FROM withdraw_requests",(err,result)=>{
+const sql = `
+SELECT 
+withdraw_requests.id,
+withdraw_requests.user_id,
+users.username,
+withdraw_requests.amount_usd,
+withdraw_requests.status,
+withdraw_requests.created_at
+FROM withdraw_requests
+JOIN users ON withdraw_requests.user_id = users.id
+`
+
+db.query(sql,(err,result)=>{
 
 if(err) return res.json({message:"DB error"})
 
@@ -217,11 +222,15 @@ return res.json({message:"Withdraw request not found"})
 }
 
 const withdraw = result[0]
+
+if(withdraw.status === "approved"){
+return res.json({message:"Withdraw already approved"})
+}
+
 const userId = withdraw.user_id
 const amount = withdraw.amount_usd
 
 
-// check wallet balance
 const getWallet = "SELECT * FROM wallet WHERE user_id=?"
 
 db.query(getWallet,[userId],(err,walletResult)=>{
@@ -239,7 +248,6 @@ return res.json({message:"Insufficient wallet balance"})
 }
 
 
-// minus wallet balance
 const updateWallet = "UPDATE wallet SET balance = balance - ? WHERE user_id=?"
 
 db.query(updateWallet,[amount,userId],(err)=>{
@@ -247,7 +255,6 @@ db.query(updateWallet,[amount,userId],(err)=>{
 if(err) return res.json({message:"Wallet update error"})
 
 
-// update withdraw status
 const updateWithdraw = "UPDATE withdraw_requests SET status='approved' WHERE id=?"
 
 db.query(updateWithdraw,[withdraw_id],(err)=>{
@@ -261,6 +268,33 @@ res.json({message:"Withdraw approved & wallet balance deducted"})
 })
 
 })
+
+})
+
+}
+
+
+// ======================
+// GET ALL WALLETS
+// ======================
+
+exports.getAllWallets = (req,res)=>{
+
+const sql = `
+SELECT 
+users.id,
+users.username,
+users.email,
+wallet.balance
+FROM wallet
+JOIN users ON wallet.user_id = users.id
+`
+
+db.query(sql,(err,result)=>{
+
+if(err) return res.json({message:"Wallet fetch error"})
+
+res.json(result)
 
 })
 
