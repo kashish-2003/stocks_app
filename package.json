@@ -27,7 +27,10 @@
     "jsonwebtoken": "^9.0.3",
     "multer": "^2.1.1",
     "mysql2": "^3.19.1",
+<<<<<<< HEAD
+=======
     "node-cron": "^4.2.1",
+>>>>>>> 0e565759e21315b7e3dcf9a9548408cf62b0b90f
     "nodemailer": "^8.0.2"
   }
 }
