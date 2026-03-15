@@ -216,6 +216,5 @@ module.exports = {
   getTransactions,
   getUserStockQuantity,
   getTotalInvestment,
-  updatePortfolio,
   addWalletBalance
 };
