@@ -14,6 +14,9 @@ const watchlistRoutes = require("./routes/watchlistRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const portfolioRoutes = require("./routes/portfolioRoutes");
 const stockRouter = require("./routes/stockRouter");
+const userRoutes = require("./routes/userRoutes")
+const tradeRoutes = require("./routes/tradeRoutes")
+
 const app = express();
 // Middlewares
 app.use(cors());
@@ -30,6 +33,9 @@ app.use("/api/wallet", walletRoutes);
 app.use("/api/watchlist", watchlistRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/portfolio", portfolioRoutes);
+app.use("/api/user", userRoutes)
+
+app.use("/trade",tradeRoutes)
 app.use("/api", stockRouter);
 // Server start
 const PORT = process.env.PORT || 5000;
