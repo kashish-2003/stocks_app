@@ -299,3 +299,59 @@ res.json(result)
 })
 
 }
+
+
+// ======================
+// GET ALL KYC
+// ======================
+
+exports.getAllKyc = (req,res)=>{
+
+const sql = `
+SELECT 
+kyc.id,
+users.username,
+kyc.aadhaar_image,
+kyc.selfie_image,
+kyc.kyc_status
+FROM kyc
+JOIN users ON kyc.user_id = users.id
+`
+
+db.query(sql,(err,result)=>{
+
+if(err) return res.json({message:"DB error"})
+
+res.json(result)
+
+})
+
+}
+
+
+
+// ======================
+// APPROVE KYC
+// ======================
+
+exports.approveKyc = (req,res)=>{
+
+const {kyc_id} = req.body
+
+const sql = `
+UPDATE kyc
+SET kyc_status='done'
+WHERE id=?
+`
+
+db.query(sql,[kyc_id],(err)=>{
+
+if(err) return res.json({message:"KYC update error"})
+
+res.json({
+message:"KYC approved successfully"
+})
+
+})
+
+}
