@@ -1,33 +1,25 @@
 const stockModel = require("../models/stockModel");
-//const transactionModel = require("../models/transactionModel");
 // GET ALL STOCKS
 const getAllStocks = (req, res) => {
-
   stockModel.getAllStocks((err, rows) => {
-
     if (err) {
       return res.json({
         success: false,
-        message: "Error fetching stocks"
+        message: "Error fetching stocks",
       });
     }
 
     res.json({
       success: true,
-      data: rows
+      data: rows,
     });
-
   });
-
 };
-
-
-
 // BUY STOCK
 const buyStock = (req, res) => {
 
-  const { user_id, symbol, quantity, stock_id } = req.body;
-
+  const { symbol, quantity, stock_id } = req.body;
+  const user_id = req.user.id; 
   stockModel.getStockPrice(symbol, (err, stockRows) => {
 
     if (err || stockRows.length === 0) {
@@ -102,7 +94,8 @@ const buyStock = (req, res) => {
 // SELL STOCK
 const sellStock = (req, res) => {
 
-  const { user_id, symbol, quantity, stock_id } = req.body;
+  const { symbol, quantity, stock_id } = req.body;
+  const user_id = req.user.id;
 
   // BASIC VALIDATION
   if (!user_id || !symbol || !quantity || !stock_id) {
@@ -149,6 +142,7 @@ const sellStock = (req, res) => {
         });
       }
 
+
       const ownedQty = qtyRows[0].total_quantity || 0;
 
       if (ownedQty === 0) {
@@ -164,6 +158,12 @@ const sellStock = (req, res) => {
           message: "Not enough stocks to sell"
         });
       }
+      if (ownedQty < quantity) {
+    return res.json({
+      success:false,
+      message:`You only have ${ownedQty} stocks`
+  });
+}
 
       // GET TOTAL INVESTMENT
       stockModel.getTotalInvestment(user_id, symbol, (err, investRows) => {
