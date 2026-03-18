@@ -3,12 +3,25 @@
 //=====================================================
 const db = require("../config/db");
 
-exports.createWithdraw = (
-  user_id,
-  cti_id,
-  amount_usd,
-  callback
-) => {
+exports.createWithdraw = (user_id, cti_id, amount_usd, callback) => {
+
+  if (!user_id) {
+    return callback(new Error("User ID is required"));
+  }
+
+  if (!cti_id || cti_id.trim() === "") {
+    return callback(new Error("CTI ID is required"));
+  }
+
+  const ctiRegex = /^[a-zA-Z0-9._-]+@cti$/;
+
+  if (!ctiRegex.test(cti_id)) {
+    return callback(new Error("Invalid CTI ID format. Only @cti allowed"));
+  }
+
+  if (!amount_usd || isNaN(amount_usd) || Number(amount_usd) <= 0) {
+    return callback(new Error("Amount must be a positive number"));
+  }
 
   // 1️⃣ Check wallet balance
   db.query(
