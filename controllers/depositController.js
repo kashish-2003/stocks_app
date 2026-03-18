@@ -1,3 +1,9 @@
+//=====================================================
+// 📌CODE BY : PARAS VANVE
+//=====================================================
+
+//DEPOSITE CONTROLLER
+
 const depositService = require("../services/depositService");
 
 exports.deposit = (req, res) => {
@@ -16,7 +22,9 @@ exports.deposit = (req, res) => {
         console.error("Deposit Error:", err);
         return res.status(500).json({ error: err.message || "Server error" });
       }
-      res.status(200).json({ success: true, message: "Deposit request created", depositId });
-    }
+      res
+        .status(200)
+        .json({ success: true, message: "Deposit request created", depositId });
+    },
   );
 };

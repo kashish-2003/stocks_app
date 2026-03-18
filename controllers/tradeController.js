@@ -1,14 +1,17 @@
-const db = require("../config/db")
+//=====================================================
+// 📌CODE BY : DARSHIKA KHILLARE
+//=====================================================
 
-// ======================
-// TRADE HISTORY
-// ======================
+const db = require("../config/db");
 
-exports.getTradeHistory = (req,res)=>{
+// ============================================
+// 📊 TRADE HISTORY
+// ============================================
 
-const userId = req.user.id
+exports.getTradeHistory = (req, res) => {
+  const userId = req.user.id;
 
-const sql = `
+  const sql = `
 SELECT 
 id,
 user_id,
@@ -21,23 +24,20 @@ created_at
 FROM stock_transactions
 WHERE user_id = ?
 ORDER BY created_at DESC
-`
+`;
 
-db.query(sql,[userId],(err,result)=>{
+  db.query(sql, [userId], (err, result) => {
+    if (err) {
+      console.log(err);
+      return res.json({
+        success: false,
+        message: "Trade history fetch error",
+      });
+    }
 
-if(err){
-console.log(err)
-return res.json({
-success:false,
-message:"Trade history fetch error"
-})
-}
-
-res.json({
-success:true,
-data:result
-})
-
-})
-
-}
+    res.json({
+      success: true,
+      data: result,
+    });
+  });
+};

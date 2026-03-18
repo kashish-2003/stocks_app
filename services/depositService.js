@@ -1,4 +1,8 @@
-const db = require("../config/db"); // normal mysql2
+//=====================================================
+// 📌CODE BY : PARAS VANVE
+//=====================================================
+
+const db = require("../config/db"); 
 
 exports.createDeposit = (user_id, cti_id, amount_inr, leverage, screenshotFileName, callback) => {
   // 1️⃣ Insert into deposits

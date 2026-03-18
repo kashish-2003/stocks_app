@@ -1,7 +1,11 @@
+//=====================================================
+// 📌 CODE BY : PARAS VANVE
+//=====================================================
+
+// 📂 WITHDRAW MANAGEMENT -------------------------------------------
 const withdrawService = require("../services/withdrawService");
 
 exports.withdraw = (req, res) => {
-
   const user_id = req.user.id;
   const { cti_id, amount_usd } = req.body;
 
@@ -10,7 +14,6 @@ exports.withdraw = (req, res) => {
     cti_id,
     amount_usd,
     (err, withdrawId) => {
-
       if (err) {
         return res.status(500).json({ error: err.message });
       }
@@ -18,10 +21,8 @@ exports.withdraw = (req, res) => {
       res.json({
         success: true,
         message: "Withdraw request created",
-        withdrawId
+        withdrawId,
       });
-
-    }
+    },
   );
-
 };

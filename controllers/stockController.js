@@ -1,5 +1,12 @@
+//=====================================================
+// 📌CODE BY : DARSHIKA KHILLARE
+//=====================================================
+
+// 📈 STOCK TRADING CONTROLLER ----------------------------------------------
+
 const stockModel = require("../models/stockModel");
-// GET ALL STOCKS
+
+// 📊 Get All Stocks
 const getAllStocks = (req, res) => {
   stockModel.getAllStocks((err, rows) => {
     if (err) {
@@ -15,17 +22,19 @@ const getAllStocks = (req, res) => {
     });
   });
 };
-// BUY STOCK
+
+// ==========================================================
+// 🛒 BUY STOCK
+// ==========================================================
+
 const buyStock = (req, res) => {
-
   const { symbol, quantity, stock_id } = req.body;
-  const user_id = req.user.id; 
+  const user_id = req.user.id;
   stockModel.getStockPrice(symbol, (err, stockRows) => {
-
     if (err || stockRows.length === 0) {
       return res.json({
         success: false,
-        message: "Stock not found"
+        message: "Stock not found",
       });
     }
 
@@ -33,11 +42,10 @@ const buyStock = (req, res) => {
     const totalPrice = price * quantity;
 
     stockModel.getWalletBalance(user_id, (err, walletRows) => {
-
       if (err || walletRows.length === 0) {
         return res.json({
           success: false,
-          message: "Wallet not found"
+          message: "Wallet not found",
         });
       }
 
@@ -46,16 +54,15 @@ const buyStock = (req, res) => {
       if (balance < totalPrice) {
         return res.json({
           success: false,
-          message: "Insufficient balance"
+          message: "Insufficient balance",
         });
       }
 
       stockModel.updateWalletBalance(totalPrice, user_id, (err) => {
-
         if (err) {
           return res.json({
             success: false,
-            message: "Wallet deduction failed"
+            message: "Wallet deduction failed",
           });
         }
 
@@ -66,34 +73,30 @@ const buyStock = (req, res) => {
           quantity,
           totalPrice,
           (err, result) => {
-
             if (err) {
               return res.json({
                 success: false,
-                message: "Transaction failed"
+                message: "Transaction failed",
               });
             }
 
             res.json({
               success: true,
               message: "Stock purchased successfully",
-              transactionId: result.insertId
+              transactionId: result.insertId,
             });
-
-          }
+          },
         );
-
       });
     });
-
   });
-
 };
 
-//SELL STOCK
-// SELL STOCK
-const sellStock = (req, res) => {
+// ==========================================================
+// 💰 SELL STOCK
+// ==========================================================
 
+const sellStock = (req, res) => {
   const { symbol, quantity, stock_id } = req.body;
   const user_id = req.user.id;
 
@@ -101,24 +104,23 @@ const sellStock = (req, res) => {
   if (!user_id || !symbol || !quantity || !stock_id) {
     return res.json({
       success: false,
-      message: "Missing required fields"
+      message: "Missing required fields",
     });
   }
 
   if (quantity <= 0) {
     return res.json({
       success: false,
-      message: "Quantity must be greater than 0"
+      message: "Quantity must be greater than 0",
     });
   }
 
-  // CHECK STOCK EXISTS AND SYMBOL MATCH
+  // 🔎 Check Stock Exists and Symbol Match
   stockModel.getStockPrice(symbol, (err, stockRows) => {
-
     if (err || stockRows.length === 0) {
       return res.json({
         success: false,
-        message: "Stock not found"
+        message: "Stock not found",
       });
     }
 
@@ -128,50 +130,46 @@ const sellStock = (req, res) => {
     if (dbStockId !== stock_id) {
       return res.json({
         success: false,
-        message: "Stock ID does not match symbol"
+        message: "Stock ID does not match symbol",
       });
     }
 
-    // CHECK USER STOCK HOLDINGS
+    // 📦 Check User Stock Holdings
     stockModel.getUserStockQuantity(user_id, symbol, (err, qtyRows) => {
-
       if (err) {
         return res.json({
           success: false,
-          message: "Error checking holdings"
+          message: "Error checking holdings",
         });
       }
-
 
       const ownedQty = qtyRows[0].total_quantity || 0;
 
       if (ownedQty === 0) {
         return res.json({
           success: false,
-          message: "No stocks owned"
+          message: "No stocks owned",
         });
       }
 
       if (quantity > ownedQty) {
         return res.json({
           success: false,
-          message: "Not enough stocks to sell"
+          message: "Not enough stocks to sell",
         });
       }
       if (ownedQty < quantity) {
-    return res.json({
-      success:false,
-      message:`You only have ${ownedQty} stocks`
-  });
-}
-
-      // GET TOTAL INVESTMENT
+        return res.json({
+          success: false,
+          message: `You only have ${ownedQty} stocks`,
+        });
+      }
+      // 💵 Get Total Investment
       stockModel.getTotalInvestment(user_id, symbol, (err, investRows) => {
-
         if (err) {
           return res.json({
             success: false,
-            message: "Investment data error"
+            message: "Investment data error",
           });
         }
 
@@ -180,7 +178,7 @@ const sellStock = (req, res) => {
         if (ownedQty === 0) {
           return res.json({
             success: false,
-            message: "Invalid investment data"
+            message: "Invalid investment data",
           });
         }
 
@@ -190,18 +188,16 @@ const sellStock = (req, res) => {
         const buyValue = avgBuyPrice * quantity;
 
         const profitLoss = sellValue - buyValue;
-
-        // ADD MONEY TO WALLET
+        // 💳 Add Money to Wallet
         stockModel.addWalletBalance(sellValue, user_id, (err) => {
-
           if (err) {
             return res.json({
               success: false,
-              message: "Wallet update failed"
+              message: "Wallet update failed",
             });
           }
 
-          // INSERT SELL TRANSACTION
+          // 🧾 Insert Sell Transaction
           stockModel.createSellTransaction(
             user_id,
             stock_id,
@@ -209,11 +205,10 @@ const sellStock = (req, res) => {
             -quantity,
             sellValue,
             (err, result) => {
-
               if (err) {
                 return res.json({
                   success: false,
-                  message: "Sell transaction failed"
+                  message: "Sell transaction failed",
                 });
               }
 
@@ -223,52 +218,43 @@ const sellStock = (req, res) => {
                 sell_price: currentPrice,
                 total_sell_value: sellValue,
                 profit_or_loss: profitLoss,
-                transactionId: result.insertId
+                transactionId: result.insertId,
               });
-
-            }
+            },
           );
-
         });
-
       });
-
     });
-
   });
-
 };
-// TRANSACTION HISTORY
-const transactionHistory = (req, res) => {
 
+// ==========================================================
+// 📜 TRANSACTION HISTORY
+// ==========================================================
+
+const transactionHistory = (req, res) => {
   const user_id = req.params.user_id;
 
   stockModel.getTransactions(user_id, (err, rows) => {
-
     if (err) {
       return res.json({
         success: false,
-        message: "Failed to fetch transactions"
+        message: "Failed to fetch transactions",
       });
     }
 
     res.json({
       success: true,
-      data: rows
+      data: rows,
     });
-
   });
-
 };
 
-
+//EXPORTS-------------------------------------------
 
 module.exports = {
   getAllStocks,
   buyStock,
   sellStock,
-  //getUserStockQuantity,
-  // getTotalInvestment,
- //   addWalletBalance,
-  transactionHistory
+  transactionHistory,
 };
