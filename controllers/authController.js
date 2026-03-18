@@ -8,7 +8,6 @@ const { generateUsername, generatePassword } = require("../utils/generator");
 const { sendMail } = require("../config/mail");
 
 //SIGN UP -------------------------------------------------
-
 exports.signup = (req, res) => {
   const {
     first_name,
@@ -20,33 +19,68 @@ exports.signup = (req, res) => {
     account_type,
   } = req.body;
 
-  const username = generateUsername(first_name);
+  // 🔴 STEP 1 → CHECK REQUIRED FIELDS
+  if (!first_name || !email || !contact) {
+    return res.json({
+      message: "Required fields missing",
+    });
+  }
 
-  const password = generatePassword();
+  // 🔴 STEP 2 → CHECK CONTACT ALREADY EXISTS
+  const checkContact = "SELECT * FROM users WHERE contact = ?";
 
-  const sql = `INSERT INTO users
+  db.query(checkContact, [contact], (err, contactResult) => {
+    if (err) {
+      return res.json({ message: "DB error" });
+    }
+
+    if (contactResult.length > 0) {
+      return res.json({
+        message: "Contact number already registered",
+      });
+    }
+
+    // 🔴 STEP 3 → CHECK EMAIL ALSO (BEST PRACTICE)
+    const checkEmail = "SELECT * FROM users WHERE email = ?";
+
+    db.query(checkEmail, [email], (err, emailResult) => {
+      if (err) {
+        return res.json({ message: "DB error" });
+      }
+
+      if (emailResult.length > 0) {
+        return res.json({
+          message: "Email already registered",
+        });
+      }
+
+      // 🔥 STEP 4 → GENERATE USERNAME & PASSWORD
+      const username = generateUsername(first_name);
+      const password = generatePassword();
+
+      const sql = `INSERT INTO users
 (first_name,last_name,username,email,password,contact,country,state,account_type)
 VALUES (?,?,?,?,?,?,?,?,?)`;
 
-  db.query(
-    sql,
-    [
-      first_name,
-      last_name,
-      username,
-      email,
-      password,
-      contact,
-      country,
-      state,
-      account_type,
-    ],
-    async (err, result) => {
-      if (err) {
-        return res.json({ message: "Signup error", error: err });
-      }
+      db.query(
+        sql,
+        [
+          first_name,
+          last_name,
+          username,
+          email,
+          password,
+          contact,
+          country,
+          state,
+          account_type,
+        ],
+        async (err, result) => {
+          if (err) {
+            return res.json({ message: "Signup error", error: err });
+          }
 
-      const userMessage = `
+          const userMessage = `
 Hello ${first_name}
 
 Your account created successfully
@@ -55,38 +89,35 @@ Username: ${username}
 Password: ${password}
 `;
 
-      const adminMessage = `
-
+          const adminMessage = `
 New user registered
 
 Name: ${first_name} ${last_name}
 Email: ${email}
 Username: ${username}
 Password: ${password}
-
 `;
 
-      try {
-        // 📧 Send Emails to USER
-        await sendMail(email, "Account Created", userMessage);
+          try {
+            await sendMail(email, "Account Created", userMessage);
+            await sendMail(
+              "adminkashish@yopmail.com",
+              "New User Registered",
+              adminMessage
+            );
+          } catch (error) {
+            console.log("Mail Error:", error);
+          }
 
-        // 📧 Send Emails to ADMIN
-        await sendMail(
-          "adminkashish@yopmail.com",
-          "New User Registered",
-          adminMessage,
-        );
-      } catch (error) {
-        console.log("Mail Error:", error);
-      }
-
-      res.json({
-        message: "Signup successful",
-        username,
-        password,
-      });
-    },
-  );
+          res.json({
+            message: "Signup successful",
+            username,
+            password,
+          });
+        }
+      );
+    });
+  });
 };
 
 //LOGIN -------------------------------------------------
