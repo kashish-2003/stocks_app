@@ -1,3 +1,8 @@
+//=====================================================
+// 📌CODE BY : DARSHIKA KHILLARE
+//=====================================================
+
+// Update stock prices every 60 seconds using cron job and finnhub API--------------------------------------
 const cron = require("node-cron");
 const db = require("../config/db");
 const { getStockPrice } = require("./stockPrice.Service");

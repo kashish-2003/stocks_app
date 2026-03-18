@@ -1,36 +1,61 @@
-const db = require("../config/db")
-const jwt = require("jsonwebtoken")
-const { generateUsername, generatePassword } = require("../utils/generator")
-const { sendMail } = require("../config/mail")
+//=====================================================
+// 📌CODE BY : KASHISH RITHE
+//=====================================================
+
+const db = require("../config/db");
+const jwt = require("jsonwebtoken");
+const { generateUsername, generatePassword } = require("../utils/generator");
+const { sendMail } = require("../config/mail");
+
+//SIGN UP -------------------------------------------------
 
 exports.signup = (req, res) => {
+  const {
+    first_name,
+    last_name,
+    email,
+    contact,
+    country,
+    state,
+    account_type,
+  } = req.body;
 
-const { first_name, last_name, email, contact, country, state, account_type } = req.body
+  const username = generateUsername(first_name);
 
-const username = generateUsername(first_name)
+  const password = generatePassword();
 
-const password = generatePassword()
-
-const sql = `INSERT INTO users
+  const sql = `INSERT INTO users
 (first_name,last_name,username,email,password,contact,country,state,account_type)
-VALUES (?,?,?,?,?,?,?,?,?)`
+VALUES (?,?,?,?,?,?,?,?,?)`;
 
-db.query(sql, [first_name, last_name, username, email, password, contact, country, state, account_type], async (err, result) => {
+  db.query(
+    sql,
+    [
+      first_name,
+      last_name,
+      username,
+      email,
+      password,
+      contact,
+      country,
+      state,
+      account_type,
+    ],
+    async (err, result) => {
+      if (err) {
+        return res.json({ message: "Signup error", error: err });
+      }
 
-if (err) {
-return res.json({ message: "Signup error", error: err })
-}
-
-const userMessage = `
+      const userMessage = `
 Hello ${first_name}
 
 Your account created successfully
 
 Username: ${username}
 Password: ${password}
-`
+`;
 
-const adminMessage=`
+      const adminMessage = `
 
 New user registered
 
@@ -39,84 +64,83 @@ Email: ${email}
 Username: ${username}
 Password: ${password}
 
-`
+`;
 
-try {
+      try {
+        // 📧 Send Emails to USER
+        await sendMail(email, "Account Created", userMessage);
 
-// user ko mail
-await sendMail(email, "Account Created", userMessage)
+        // 📧 Send Emails to ADMIN
+        await sendMail(
+          "adminkashish@yopmail.com",
+          "New User Registered",
+          adminMessage,
+        );
+      } catch (error) {
+        console.log("Mail Error:", error);
+      }
 
-// admin ko mail
-await sendMail("adminkashish@yopmail.com", "New User Registered", adminMessage)
+      res.json({
+        message: "Signup successful",
+        username,
+        password,
+      });
+    },
+  );
+};
 
-} catch (error) {
-console.log("Mail Error:", error)
-}
-
-res.json({
-message: "Signup successful",
-username,
-password
-})
-
-})
-
-}
-
+//LOGIN -------------------------------------------------
 
 exports.login = (req, res) => {
+  const { username, password } = req.body;
 
-const { username, password } = req.body
+  const sql = "SELECT * FROM users WHERE username=? AND password=?";
 
-const sql = "SELECT * FROM users WHERE username=? AND password=?"
+  db.query(sql, [username, password], (err, result) => {
+    if (err) {
+      return res.json({ message: "Login error" });
+    }
 
-db.query(sql, [username, password], (err, result) => {
+    if (result.length === 0) {
+      return res.json({ message: "Invalid credentials" });
+    }
 
-if (err) {
-return res.json({ message: "Login error" })
-}
+    const user = result[0];
 
-if (result.length === 0) {
-return res.json({ message: "Invalid credentials" })
-}
+    const token = jwt.sign(
+      { id: user.id, username: user.username, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" },
+    );
 
-const user = result[0]
+    res.json({
+      message: "Login successful",
+      token: token,
+      user: user,
+    });
+  });
+};
 
-const token = jwt.sign(
-{ id: user.id, username: user.username, role: user.role },
-process.env.JWT_SECRET,
-{ expiresIn: "1h" }
-)
-
-res.json({
-message: "Login successful",
-token: token,
-user: user
-})
-
-})
-
-}
-
-const crypto = require("crypto")
-// const jwt = require("jsonwebtoken")
+const crypto = require("crypto");
 
 exports.forgetPassword = async (req, res) => {
-  const { email } = req.body
+  const { email } = req.body;
 
   // check if user exists
-  const sql = "SELECT * FROM users WHERE email=?"
+  const sql = "SELECT * FROM users WHERE email=?";
   db.query(sql, [email], async (err, result) => {
-    if (err) return res.json({ message: "DB error", error: err })
-    if (result.length === 0) return res.json({ message: "User not found" })
+    if (err) return res.json({ message: "DB error", error: err });
+    if (result.length === 0) return res.json({ message: "User not found" });
 
-    const user = result[0]
+    const user = result[0];
 
     // generate temporary token valid for 10 minutes
-    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: "10m" })
+    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
+      expiresIn: "10m",
+    });
 
-    // link user ko mail me
-    const link = `http://localhost:5000/api/change-password?token=${token}`
+    // 📧 Send Emails to uLINKED-USER
+    const link = `http://localhost:5000/api/change-password?token=${token}`;
 
     const message = `
 Hi ${user.first_name},
@@ -127,32 +151,32 @@ Click the link to change password:
 ${link}
 
 This link will expire in 10 minutes.
-`
+`;
 
     try {
-      await sendMail(user.email, "Password Reset Link", message)
-      res.json({ message: "Reset link sent to your email" })
+      await sendMail(user.email, "Password Reset Link", message);
+      res.json({ message: "Reset link sent to your email" });
     } catch (error) {
-      console.log(error)
-      res.json({ message: "Mail sending failed" })
+      console.log(error);
+      res.json({ message: "Mail sending failed" });
     }
-  })
-}
+  });
+};
 exports.changePassword = (req, res) => {
-  const { token, newPassword } = req.body
+  const { token, newPassword } = req.body;
 
-  if (!token) return res.json({ message: "Token required" })
+  if (!token) return res.json({ message: "Token required" });
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET)
-    const userId = decoded.id
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const userId = decoded.id;
 
-    const sql = "UPDATE users SET password=? WHERE id=?"
+    const sql = "UPDATE users SET password=? WHERE id=?";
     db.query(sql, [newPassword, userId], (err, result) => {
-      if (err) return res.json({ message: "DB error", error: err })
-      res.json({ message: "Password changed successfully" })
-    })
+      if (err) return res.json({ message: "DB error", error: err });
+      res.json({ message: "Password changed successfully" });
+    });
   } catch (error) {
-    return res.json({ message: "Invalid or expired token" })
+    return res.json({ message: "Invalid or expired token" });
   }
-}
+};

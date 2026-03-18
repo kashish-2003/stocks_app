@@ -12,7 +12,7 @@ const storage = multer.diskStorage({
     const ext = path.extname(file.originalname);
     const filename = `deposit_${Date.now()}${ext}`;
     cb(null, filename);
-  }
+  },
 });
 
 const fileFilter = (req, file, cb) => {

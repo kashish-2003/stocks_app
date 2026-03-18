@@ -1,17 +1,18 @@
-const multer = require("multer")
+//=====================================================
+// 📌CODE BY : KASHISH RITHE
+//=====================================================
+const multer = require("multer");
 
 const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "uploads/");
+  },
 
-destination:(req,file,cb)=>{
-cb(null,"uploads/")
-},
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + "_" + file.originalname);
+  },
+});
 
-filename:(req,file,cb)=>{
-cb(null,Date.now()+"_"+file.originalname)
-}
+const upload = multer({ storage });
 
-})
-
-const upload = multer({storage})
-
-module.exports = upload
+module.exports = upload;

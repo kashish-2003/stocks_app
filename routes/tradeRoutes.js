@@ -1,11 +1,11 @@
-const express = require("express")
-const router = express.Router()
+// 📡 TRADE HISTORY ROUTER ----------------------------------------------------------------------
 
-const {verifyToken} = require("../middleware/adminAuth")
+const express = require("express");
+const router = express.Router();
+const { verifyToken } = require("../middleware/adminAuth");
+const { getTradeHistory } = require("../controllers/tradeController");
 
-const {getTradeHistory} = require("../controllers/tradeController")
+//ROUTES...
+router.get("/history", verifyToken, getTradeHistory);
 
-// TRADE HISTORY API
-router.get("/history",verifyToken,getTradeHistory)
-
-module.exports = router
+module.exports = router;

@@ -1,3 +1,9 @@
+//=====================================================
+// 📌 CODE BY : PARAS VANVE
+//=====================================================
+
+// 💰 WALLET MANAGEMENT -------------------------------------------
+
 const walletService = require("../services/walletService");
 
 exports.getWallet = (req, res) => {

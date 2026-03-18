@@ -1,9 +1,16 @@
+//=====================================================
+// 📌CODE BY : KASHISH RITHE
+//=====================================================
+
 const db = require("../config/db")
 const jwt = require("jsonwebtoken")
 
-// ======================
-// ADMIN LOGIN
-// ======================
+// =====================================================
+// 🔐 ADMIN AUTHENTICATION
+// =====================================================
+
+// Admin Login API
+// Validates admin credentials and generates token
 
 exports.adminLogin = (req,res)=>{
 
@@ -36,10 +43,12 @@ token
 
 }
 
+// =====================================================
+// 👤 USER MANAGEMENT
+// =====================================================
 
-// ======================
-// VIEW ALL USERS
-// ======================
+// 📋 View all users
+// This API returns the list of all registered users
 
 exports.getAllUsers = (req,res)=>{
 
@@ -54,9 +63,10 @@ res.json(result)
 }
 
 
-// ======================
-// VIEW ALL DEPOSITS
-// ======================
+
+// =====================================================
+// 💰 VIEW ALL DEPOSITS
+// =====================================================
 
 exports.getAllDeposits = (req,res)=>{
 
@@ -71,9 +81,11 @@ res.json(result)
 }
 
 
-// ======================
-// APPROVE DEPOSIT
-// ======================
+// ===========================================
+//  ✅ Approve deposit
+// ===========================================
+
+// Updates deposit status to "approved"
 
 exports.approveDeposit = (req,res)=>{
 
@@ -153,10 +165,11 @@ res.json({message:"Deposit approved, wallet updated"})
 }
 
 
-// ======================
-// REJECT DEPOSIT
-// ======================
+// =========================================
+// ❌ Reject deposit
+// =========================================
 
+// Updates deposit status to "rejected"
 exports.rejectDeposit = (req,res)=>{
 
 const {deposit_id} = req.body
@@ -174,9 +187,9 @@ res.json({message:"Deposit rejected"})
 }
 
 
-// ======================
-// GET WITHDRAW REQUESTS
-// ======================
+// ===========================================
+// 📌 GET WITHDRAW REQUESTS
+// ===========================================
 
 exports.getWithdrawRequests = (req,res)=>{
 
@@ -203,9 +216,9 @@ res.json(result)
 }
 
 
-// ======================
-// APPROVE WITHDRAW
-// ======================
+// ===========================================
+// ✅  APPROVE WITHDRAW
+// ===========================================
 
 exports.approveWithdraw = (req,res)=>{
 
@@ -274,9 +287,9 @@ res.json({message:"Withdraw approved & wallet balance deducted"})
 }
 
 
-// ======================
-// GET ALL WALLETS
-// ======================
+// ===========================================
+// 💰 GET ALL WALLETS
+// ===========================================
 
 exports.getAllWallets = (req,res)=>{
 
@@ -301,9 +314,9 @@ res.json(result)
 }
 
 
-// ======================
-// GET ALL KYC
-// ======================
+// ============================================
+// 📋 GET ALL KYC
+// ============================================
 
 exports.getAllKyc = (req,res)=>{
 
@@ -330,9 +343,9 @@ res.json(result)
 
 
 
-// ======================
-// APPROVE KYC
-// ======================
+// ============================================
+//  ✅ APPROVE KYC
+// ============================================
 
 exports.approveKyc = (req,res)=>{
 
